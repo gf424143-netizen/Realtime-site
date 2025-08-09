@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>My Site</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Protected Content</h1>
+    <input type="password" id="password" placeholder="Enter password">
+    <button onclick="login()">Access</button>
+
+    <div id="content" style="display:none;">
+        <h2>Live Content:</h2>
+        <p id="liveText"></p>
+    </div>
+
+    <script>
+        const socket = io();
+        let access = false;
+
+        function login() {
+            const pass = document.getElementById('password').value;
+            fetch(`/auth?password=${encodeURIComponent(pass)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.access) {
+                        document.getElementById('content').style.display = 'block';
+                        access = true;
+                    } else {
+                        alert("Wrong password");
+                    }
+                });
+        }
+
+        socket.on("updateContent", text => {
+            if (access) {
+                document.getElementById('liveText').textContent = text;
+            }
+        });
+    </script>
+</body>
+</html>
