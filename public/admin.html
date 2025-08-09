@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Editor</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Admin Panel</h1>
+    <input type="password" id="password" placeholder="Enter admin password">
+    <button onclick="login()">Login</button>
+
+    <div id="editor" style="display:none;">
+        <textarea id="newContent" rows="6" cols="50"></textarea><br>
+        <button onclick="update()">Update Content</button>
+    </div>
+
+    <script>
+        const socket = io();
+        let adminAccess = false;
+
+        function login() {
+            const pass = document.getElementById('password').value;
+            fetch(`/auth-admin?password=${encodeURIComponent(pass)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.access) {
+                        document.getElementById('editor').style.display = 'block';
+                        adminAccess = true;
+                    } else {
+                        alert("Wrong password");
+                    }
+                });
+        }
+
+        function update() {
+            if (adminAccess) {
+                const text = document.getElementById('newContent').value;
+                socket.emit("updateContent", text);
+            }
+        }
+    </script>
+</body>
+</html>
